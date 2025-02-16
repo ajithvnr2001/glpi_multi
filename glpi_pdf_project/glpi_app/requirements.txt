@@ -13,7 +13,7 @@ reportlab
 openai
 sentence-transformers
 langchain-openai
-langchain-huggingface # Add this
+langchain-huggingface
 tenacity
 PyYAML
 gunicorn
