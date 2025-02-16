@@ -4,11 +4,22 @@ from langchain.chains import RetrievalQA
 from unstructured.partition.html import partition_html
 from typing import List, Dict, Optional
 from langchain_openai import OpenAI
-from langchain_huggingface import HuggingFaceEmbeddings  # Corrected import
+from langchain_huggingface import HuggingFaceEmbeddings
 import requests
 import json
 import base64
 import logging
+
+# --- NLTK Data Download (Added) ---
+import nltk
+nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
+nltk.data.path.append(nltk_data_path)
+os.makedirs(nltk_data_path, exist_ok=True)
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', download_dir=nltk_data_path)
+# --- End NLTK Data Download ---
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +49,7 @@ class LLMService:
             api_key=self.akash_api_key,
             base_url=self.akash_api_base,
             temperature=0.2,
-            max_tokens=1000, # Increased max_tokens
+            max_tokens=1000,
         )
         logger.info(f"LLMService initialized with text model: {self.text_model_name}")
 
