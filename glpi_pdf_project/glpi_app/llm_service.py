@@ -100,20 +100,17 @@ class LLMService:
             prompt = context + prompt
         return self.llm.invoke(prompt)
 
-    def process_image(self, image_path: str, prompt: str) -> Optional[str]:
-        """Processes an image using the OpenRouter API (Qwen).
+    def process_image(self, image_data: str, prompt: str) -> Optional[str]:
+        """Processes an image using the OpenRouter API (Qwen).  NO FILE PATH.
 
         Args:
-            image_path: Path to the image file.
+            image_data: Base64 encoded image data.
             prompt: The prompt for the image model.
 
         Returns:
             The LLM's response, or None if an error occurred.
         """
         try:
-            with open(image_path, "rb") as image_file:
-                base64_image = base64.b64encode(image_file.read()).decode("utf-8")
-
             headers = {
                 "Authorization": f"Bearer {self.openrouter_api_key}",
                 # Removed  "HTTP-Referer" and "X-Title"
@@ -128,7 +125,7 @@ class LLMService:
                             {
                                 "type": "image_url",
                                 "image_url": {
-                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                    "url": f"data:image/jpeg;base64,{image_data}" #removed file
                                 },
                              }
                         ]
