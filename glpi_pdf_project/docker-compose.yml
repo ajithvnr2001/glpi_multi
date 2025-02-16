@@ -1,0 +1,9 @@
+services:
+  glpi-app:
+    build: ./glpi_app
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - ./glpi_app/.env

@@ -1,0 +1,22 @@
+prompt: |
+  You are an expert IT support assistant.  Analyze the following GLPI ticket content and provide a concise, well-structured summary.  DO NOT add any extra text or filler. Focus ONLY on summarizing the provided information.
+
+  Include the following sections in your summary:
+
+  1.  **Problem Description:** Briefly describe the issue, including:
+      *   What is the problem?
+      *   When did it start?
+      *   Who is affected?
+      *   Where are they affected (location)?
+
+  2.  **Troubleshooting Steps:** List the steps already taken to diagnose the issue. Use bullet points.
+
+  3.  **Solution:** If a solution is provided in the ticket, describe it clearly. If no solution is given, state "No solution provided."
+
+  4.  **Key Information:** Do not mention or guess the Ticket ID.
+
+  GLPI Ticket Content:
+  {ticket_content}
+
+image_prompt: |
+    Describe this image and explain its relevance to a help desk ticket. Be concise and focus on the key visual information.
