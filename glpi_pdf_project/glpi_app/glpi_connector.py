@@ -4,6 +4,7 @@ from typing import List, Dict, Optional
 import logging
 from tenacity import retry, stop_after_attempt, wait_exponential
 import os
+import base64
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -103,7 +104,7 @@ class GLPIConnector:
 
             # Fetch associated documents
             documents = self.get_ticket_documents(ticket_id)
-            ticket['documents'] = documents
+            ticket['documents'] = documents  # Add document data to the ticket
             return ticket
 
         except requests.exceptions.RequestException as e:
@@ -112,12 +113,11 @@ class GLPIConnector:
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=5))
     def get_ticket_documents(self, ticket_id: int) -> List[Dict]:
-        """Retrieves document information associated with a ticket."""
+        """Retrieves document information (including base64 data) for a ticket."""
         if not self.session_token:
             if not self.init_session():
                 return []
 
-        # Get linked items (which can include Documents)
         linked_items_url = f"{self.glpi_url}/Ticket/{ticket_id}/Item_Ticket"
         try:
             response = requests.get(linked_items_url, headers=self.headers)
@@ -128,25 +128,24 @@ class GLPIConnector:
             documents = []
             for item in linked_items:
                 if item.get('itemtype') == 'Document':
-                    # Fetch document details
                     document_url = f"{self.glpi_url}/Document/{item.get('items_id')}?expand_dropdowns=true"
                     doc_response = requests.get(document_url, headers=self.headers)
                     doc_response.raise_for_status()
                     doc_data = doc_response.json()
-
-                    # Construct the download URL
-                    download_url = f"{self.glpi_url}/Document/{item.get('items_id')}"
-                    # Get the filename
                     filename = doc_data.get('filename')
                     if filename:
+                        # Get base64 encoded file content
+                        file_url = f"{self.glpi_url}/Document/{item.get('items_id')}/"
+                        file_response = requests.get(file_url, headers=self.headers, params={"alt": "base64"})
+                        file_response.raise_for_status()
+                        base64_content = file_response.text
+                        
                         documents.append({
                             "id": item.get("items_id"),
                             "filename": filename,
-                            "download_url": download_url,
-                            "filepath": os.path.join,
+                            "encoded_content": base64_content, # Store base64 data directly
                         })
-                        logger.info(f"Found document {filename} for ticket {ticket_id}.")
-
+                        logger.info(f"Found and encoded document {filename} for ticket {ticket_id}.")
             return documents
 
         except requests.exceptions.RequestException as e:
