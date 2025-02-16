@@ -77,7 +77,7 @@ class AutoPDF:
                     # image_path = await self.download_image(doc["download_url"], doc["filename"]) #removed
 
                     if doc.get('encoded_content'): #check for the encoded content
-                        # temp_image_paths.append(image_path) # removed
+                        # temp_image_paths.append(image_path) #removed
                         image_prompt = self.image_prompt_template  # Use the image prompt
                         image_result = self.llm_service.process_image(doc.get('encoded_content'), image_prompt) #pass encoded content
                         if image_result:
@@ -113,7 +113,6 @@ Combine the following text summary and image summary into a single, coherent sum
                 f"Ticket Analysis - #{ticket_id}", cleaned_result, source_info  # Pass ONLY the result
             )
             logger.info(f"Report generated: glpi_ticket_{ticket_id}.pdf")
-
 
         except Exception as e:
             logger.error(f"Error processing ticket {ticket_id}: {e}", exc_info=True)
