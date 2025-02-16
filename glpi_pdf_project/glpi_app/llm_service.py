@@ -10,17 +10,6 @@ import json
 import base64
 import logging
 
-# --- NLTK Data Download (Added) ---
-import nltk
-nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
-nltk.data.path.append(nltk_data_path)
-os.makedirs(nltk_data_path, exist_ok=True)
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt', download_dir=nltk_data_path)
-# --- End NLTK Data Download ---
-
 logger = logging.getLogger(__name__)
 
 class LLMService:
