@@ -4,7 +4,7 @@ from langchain.chains import RetrievalQA
 from unstructured.partition.html import partition_html
 from typing import List, Dict, Optional
 from langchain_openai import OpenAI
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings  # Corrected import
 import requests
 import json
 import base64
@@ -125,7 +125,7 @@ class LLMService:
                             {
                                 "type": "image_url",
                                 "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image_data}" #removed file
+                                    "url": f"data:image/jpeg;base64,{image_data}"
                                 },
                              }
                         ]
