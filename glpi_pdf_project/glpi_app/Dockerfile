@@ -2,8 +2,6 @@ FROM python:3.11-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-# Set NLTK_DATA *before* installing any packages that might use nltk
-ENV NLTK_DATA=/usr/local/share/nltk_data
 
 WORKDIR /app
 
