@@ -4,7 +4,7 @@ from langchain.chains import RetrievalQA
 from unstructured.partition.html import partition_html
 from typing import List, Dict, Optional
 from langchain_openai import OpenAI
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings  # Corrected import
 import requests
 import json
 import base64
@@ -38,7 +38,7 @@ class LLMService:
             api_key=self.akash_api_key,
             base_url=self.akash_api_base,
             temperature=0.2,
-            max_tokens=500,
+            max_tokens=1000, # Increased max_tokens
         )
         logger.info(f"LLMService initialized with text model: {self.text_model_name}")
 
