@@ -10,7 +10,7 @@ import json
 import re
 import yaml  # Import the YAML library
 import logging
-import requests
+import base64
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -70,16 +70,18 @@ class AutoPDF:
 
 
             # --- Image Processing (OpenRouter) ---
-            temp_image_paths = []  # Store paths to temporary image files
-            for doc in ticket.get('documents', []):
-                image_path = await self.download_image(doc["download_url"], doc["filename"])
+            # temp_image_paths = []  # Store paths to temporary image files #removed
+            if ticket.get('documents'): #check if there are any documents.
+                for doc in ticket.get('documents', []):
+                    # Removed downlaod image
+                    # image_path = await self.download_image(doc["download_url"], doc["filename"]) #removed
 
-                if image_path:
-                    temp_image_paths.append(image_path)
-                    image_prompt = self.image_prompt_template  # Use the image prompt
-                    image_result = self.llm_service.process_image(image_path, image_prompt)
-                    if image_result:
-                        image_summary += image_result + "\n"  # Accumulate image summaries
+                    if doc.get('encoded_content'): #check for the encoded content
+                        # temp_image_paths.append(image_path) # removed
+                        image_prompt = self.image_prompt_template  # Use the image prompt
+                        image_result = self.llm_service.process_image(doc.get('encoded_content'), image_prompt) #pass encoded content
+                        if image_result:
+                            image_summary += image_result + "\n"  # Accumulate image summaries
 
             # --- Combine Summaries ---
             if text_summary and image_summary:
@@ -112,14 +114,6 @@ Combine the following text summary and image summary into a single, coherent sum
             )
             logger.info(f"Report generated: glpi_ticket_{ticket_id}.pdf")
 
-            # --- Cleanup: Delete temporary images ---
-            for image_path in temp_image_paths:
-                try:
-                    os.remove(image_path)
-                    logger.info(f"Deleted temporary image: {image_path}")
-                except OSError as e:
-                    logger.error(f"Error deleting temporary image {image_path}: {e}", exc_info=True)
-
 
         except Exception as e:
             logger.error(f"Error processing ticket {ticket_id}: {e}", exc_info=True)
@@ -128,44 +122,6 @@ Combine the following text summary and image summary into a single, coherent sum
             if not self.glpi.kill_session():
                 logger.warning("Failed to kill GLPI session.")
 
-    async def download_image(self, download_url: str, filename: str) -> Optional[str]:
-        """Downloads an image from a URL and saves it temporarily.
-
-        Args:
-            download_url: The URL to download the image from.
-            filename: name of the file
-
-        Returns:
-            The path to the downloaded image file, or None if an error occurred.
-        """
-        headers = {
-            "Session-Token": self.glpi.session_token,
-            "App-Token": self.glpi.app_token,
-            }
-        try:
-            response = requests.get(download_url, headers=headers, stream=True)
-            response.raise_for_status()
-            # Sanitize filename: replace invalid characters
-            safe_filename = re.sub(r'[\\/*?:"<>|]', "", filename)
-            temp_dir = "temp_images"
-            os.makedirs(temp_dir, exist_ok=True)  # Ensure the directory exists
-
-            file_extension = os.path.splitext(safe_filename)[1]  # Get file extension
-            if not file_extension: #if no extension, use default
-                safe_filename = safe_filename + ".jpg"
-            temp_file_path = os.path.join(temp_dir, safe_filename)
-
-            with open(temp_file_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            logger.info(f"Downloaded image to: {temp_file_path}")
-            return temp_file_path
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error downloading image from {download_url}: {e}", exc_info=True)
-            return None
-        except OSError as e:
-            logger.error(f"Error saving image to {filename}: {e}", exc_info=True)
-            return None
 
     def post_process_llm_output(self, text: str) -> str:
         """Cleans up the LLM output."""
