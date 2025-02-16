@@ -33,14 +33,14 @@ class LLMService:
             raise ValueError("OPENROUTER_API_KEY environment variable not set.")
 
 
-        self.text_llm = OpenAI(
-            model=self.model_name,
+        self.llm = OpenAI(
+            model=self.text_model_name,
             api_key=self.akash_api_key,
             base_url=self.akash_api_base,
             temperature=0.2,
             max_tokens=500,
         )
-        logger.info(f"LLMService initialized with text model: {text_model_name}")
+        logger.info(f"LLMService initialized with text model: {self.text_model_name}")
 
 
     def get_embedding_function(self):
@@ -62,7 +62,7 @@ class LLMService:
     def query_llm(self, db, query: str):
         """Queries the LLM using RetrievalQA (for text)."""
         qa = RetrievalQA.from_chain_type(
-            llm=self.text_llm, chain_type="stuff", retriever=db.as_retriever(search_kwargs={'k': 1})
+            llm=self.llm, chain_type="stuff", retriever=db.as_retriever(search_kwargs={'k': 1})
         )
         result = qa.invoke({"query": query})["result"]
         logger.info(f"LLM query result: {result}")
@@ -98,7 +98,7 @@ class LLMService:
         """Completes a prompt using the OpenAI-compatible API (Akash)."""
         if context:
             prompt = context + prompt
-        return self.text_llm.invoke(prompt)
+        return self.llm.invoke(prompt)
 
     def process_image(self, image_path: str, prompt: str) -> Optional[str]:
         """Processes an image using the OpenRouter API (Qwen).
