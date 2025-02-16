@@ -139,7 +139,7 @@ class GLPIConnector:
                         file_response = requests.get(file_url, headers=self.headers, params={"alt": "base64"})
                         file_response.raise_for_status()
                         base64_content = file_response.text
-                        
+
                         documents.append({
                             "id": item.get("items_id"),
                             "filename": filename,
