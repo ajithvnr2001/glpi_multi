@@ -17,3 +17,6 @@ prompt: |
 
   GLPI Ticket Content:
   {ticket_content}
+
+image_prompt: |
+    Describe this image and explain its relevance to a help desk ticket. Be concise and focus on the key visual information.
