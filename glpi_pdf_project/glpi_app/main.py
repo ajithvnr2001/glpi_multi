@@ -71,11 +71,11 @@ class AutoPDF:
 
             final_result = self.combine_summaries(text_summary, image_summary)
             cleaned_result = self.post_process_llm_output(final_result)
-            
+
             pdf_generator = PDFGenerator(f"glpi_ticket_{ticket_id}.pdf")
             pdf_generator.generate_report(
-                f"Ticket Analysis - #{ticket_id}", 
-                cleaned_result, 
+                f"Ticket Analysis - #{ticket_id}",
+                cleaned_result,
                 [{"source_id": ticket_id, "source_type": "glpi_ticket"}]
             )
 
@@ -108,10 +108,10 @@ class AutoPDF:
             safe_filename = re.sub(r'[\\/*?:"<>|]', "", filename)
             temp_dir = "temp_images"
             os.makedirs(temp_dir, exist_ok=True)
-            
+
             file_extension = os.path.splitext(safe_filename)[1] or ".jpg"
             temp_file_path = os.path.join(temp_dir, f"{safe_filename}{file_extension}")
-            
+
             with open(temp_file_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
@@ -123,7 +123,14 @@ class AutoPDF:
     def post_process_llm_output(self, text: str) -> str:
         text = re.sub(r"Please let me know if you need any further assistance\.?|I'm here to help\.?|Best regards, \[Your Name] IT Support Assistant\.?", "", text, flags=re.IGNORECASE)
         lines = [line.strip() for line in text.split("\n") if line.strip()]
-        return "\n".join(lines)
+        text = "\n".join(lines)
+
+        # Remove repetitive "Key Information" lines
+        parts = text.split("Key Information:")
+        if len(parts) > 1:
+            text = "Key Information:".join(parts[:2])  # Keep only the first occurrence
+
+        return text
 
 auto_pdf_app = AutoPDF()
 
