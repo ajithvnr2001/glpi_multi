@@ -6,6 +6,10 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 COPY requirements.txt /app/
+
+# Download NLTK data during image build
+RUN python -m nltk.downloader punkt averaged_perceptron_tagger -d /usr/local/share/nltk_data
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app/
